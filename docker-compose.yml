@@ -1,8 +1,73 @@
 version: '3'
 
 services:
-  serializer:
+  json:
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.common
+    expose:
+      - 8080
     ports:
       - "0.0.0.0:8080:8080"
+    command:
+      uvicorn main:app --host 0.0.0.0 --port 8080
+  yaml:
+    build:
+      dockerfile: Dockerfile.common
+    expose:
+      - 8088
+    ports:
+      - "0.0.0.0:8088:8088"
+    command:
+      uvicorn main:app --host 0.0.0.0 --port 8088
+  msgpack:
+    build:
+      dockerfile: Dockerfile.common
+    expose:
+      - 8089
+    ports:
+      - "0.0.0.0:8089:8089"
+    command:
+      uvicorn main:app --host 0.0.0.0 --port 8089
+  xml:
+    build:
+      dockerfile: Dockerfile.common
+    expose:
+      - 8090
+    ports:
+      - "0.0.0.0:8090:8090"
+    command:
+      uvicorn main:app --host 0.0.0.0 --port 8090
+
+  proxy:
+    build:
+      dockerfile: Dockerfile.common
+    expose:
+      - 2000/udp
+    ports:
+      - 2000:2000/udp
+    environment:
+      PROXY_HOST: "127.0.0.1"
+      PROXY_PORT: "2000"
+    command:
+      python3 proxy.py
+    depends_on:
+      - json
+      - yaml
+      - xml
+      - msgpack
+
+  client:
+    build:
+      dockerfile: Dockerfile.common
+    expose:
+      - 2001/udp
+    ports:
+      - 2001:2001/udp
+    environment:
+      PROXY_PORT: "2000"
+      CLIENT_HOST: "127.0.0.1"
+      CLIENT_PORT: "2001"
+    depends_on:
+      - proxy
+    command:
+      python3 client.py

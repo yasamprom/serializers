@@ -5,6 +5,7 @@ import msgpack
 from fastapi import FastAPI, HTTPException
 import time
 import sys
+import logging
 
 
 class Data:
@@ -52,19 +53,20 @@ dt = Data()
 app = FastAPI()
 
 @app.get("/test/{type}")
-async def test(type: int):
+async def test(type: str):
+    logging.info("main server got query: %s", type)
     cycles = 100
     ser_func, deser_func = None, None
-    if type == 1:  # json
+    if type == "json":  # json
         ser_func = to_json
         deser_func = from_json
-    if type == 2:  # xml
+    if type == "xml":  # xml
         ser_func = to_xml
         deser_func = from_xml
-    if type == 3:  # yaml
+    if type == "yaml":  # yaml
         ser_func = to_yaml
         deser_func = from_yaml
-    if type == 4:  # msgpack
+    if type == "msgpack":  # msgpack
         ser_func = to_msg
         deser_func = from_msg
 

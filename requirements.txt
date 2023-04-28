@@ -4,3 +4,4 @@ uvicorn[standard]==0.17.*
 fastapi==0.95.1
 PyYAML==6.0
 msgpack==1.0.5
+requests==2.29.0
