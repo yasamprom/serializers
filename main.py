@@ -1,3 +1,5 @@
+from io import BytesIO
+
 from xml_marshaller import xml_marshaller
 import jsonpickle
 import yaml
@@ -6,6 +8,7 @@ from fastapi import FastAPI, HTTPException
 import fastavro
 import time
 import sys
+import data_pb2
 from pympler import asizeof
 import logging
 
@@ -13,18 +16,17 @@ import logging
 class Data:
     def __init__(self):
         self.float = 123.001
+        self.bool = True
         self.integer = 123
         self.string = "123" * 100
         self.lst = [123] * 100
-        self.myset = {123, 123123, 123123123}
-        self.dct = {"123": 123, "123123": [123] * 50}
-        self.tup = (123, 123, 123)
+        self.dct = {"123": 123}
 data_dict =  {
         "float": 123.001,
+        "bool": True,
         "integer": 123,
         "string":"123" * 100,
         "lst": [123] * 100,
-        "myset": {123, 123123, 123123123},
         "dct": {"123": "123"}
 }
 
@@ -48,8 +50,7 @@ def from_yaml(yaml_str):
 
 def encode(obj):
     if isinstance(obj, Data):
-        return [obj.float, obj.integer, obj.string, obj.lst,
-                obj.myset, obj.dct, obj.tup]
+        return [obj.float, obj.bool, obj.integer, obj.string, obj.lst, obj.dct]
 
 def to_msg(cls):
     return msgpack.packb(cls, default=encode)
@@ -57,28 +58,47 @@ def to_msg(cls):
 def from_msg(msg_str):
     return msgpack.unpackb(msg_str, strict_map_key=False)
 
-def to_avro(cls):
-    data_schema = {
+def to_proto(data):
+    mydata = data_pb2.MyData()
+    mydata.float = dt.float
+    mydata.bool = dt.bool
+    mydata.integer = dt.integer
+    mydata.string = dt.string
+    mydata.lst.extend(dt.lst)
+    for key in dt.dct:
+        mydata.dct[key] = dt.dct[key]
+
+    return mydata.SerializeToString()
+
+def from_proto(msg):
+    mydata = data_pb2.MyData()
+    mydata.ParseFromString(msg)
+
+
+data_schema = {
+        "namespace": "example.avro",
         "type": "record",
         "name": "dict",
         "fields": [
             {"name": "float", "type": "float"},
+            {"name": "bool", "type": "boolean"},
             {"name": "integer", "type": "int"},
             {"name": "string", "type": "string"},
             {"name": "lst", "type": {"type": "array", "items": "int"}},
             {"name": "dct", "type": {"type": "map", "values": "string"}},
         ]
     }
-    with open("data.avro", "wb") as avro_file:
-        fastavro.schemaless_writer(avro_file, data_schema, data_dict)
-    return None
+def to_avro(cls):
+    bytes_writer = BytesIO()
+    fastavro.schemaless_writer(bytes_writer, data_schema, data_dict)
+    return bytes_writer.getvalue()
 
 def from_avro(msg):
-    return
-    with open('data.avro', 'rb') as fo:
-        avro_reader = fastavro.reader(fo)
-        for _ in avro_reader:
-            pass
+    bytes_writer = BytesIO()
+    bytes_writer.write(msg)
+    bytes_writer.seek(0)
+    fastavro.schemaless_reader(bytes_writer, data_schema)
+
 
 
 dt = Data()
@@ -105,6 +125,9 @@ async def test(type: str):
     if type == "avro":
         ser_func = to_avro
         deser_func = from_avro
+    if type == "proto":
+        ser_func = to_proto
+        deser_func = from_proto
 
     if ser_func is None or deser_func is None:
         return {"error": "no such type of serialization"}

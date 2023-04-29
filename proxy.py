@@ -5,7 +5,6 @@ import requests
 import logging
 logging.basicConfig(level=logging.INFO)
 
-MAIN_HOST = "0.0.0.0"
 HOST = os.getenv("PROXY_HOST")
 PORT = os.getenv("PROXY_PORT")
 FORWARD = {
@@ -13,7 +12,8 @@ FORWARD = {
     "yaml": 8088,
     "msgpack": 8089,
     "xml": 8090,
-    "avro": 8091
+    "avro": 8091,
+    "proto": 8092
 }
 BUFF_SIZE = 1024
 

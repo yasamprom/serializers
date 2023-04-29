@@ -7,3 +7,4 @@ msgpack==1.0.5
 requests==2.29.0
 fastavro==1.7.3
 Pympler==1.0.1
+protobuf
