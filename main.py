@@ -109,7 +109,6 @@ def from_avro(msg):
     fastavro.schemaless_reader(bytes_writer, data_schema)
 
 
-
 dt = Data()
 
 app = FastAPI()
