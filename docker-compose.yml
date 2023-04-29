@@ -7,50 +7,43 @@ networks:
 
 services:
   json:
-    build:
-      dockerfile: Dockerfile.common
+    image: stepastrunkov/serializer
     networks:
       - net
     command:
       uvicorn main:app --host "json" --port 8080
   yaml:
-    build:
-      dockerfile: Dockerfile.common
+    image: stepastrunkov/serializer
     networks:
       - net
     command:
       uvicorn main:app --host "yaml" --port 8088
   msgpack:
-    build:
-      dockerfile: Dockerfile.common
+    image: stepastrunkov/serializer
     networks:
       - net
     command:
       uvicorn main:app --host "msgpack" --port 8089
   xml:
-    build:
-      dockerfile: Dockerfile.common
+    image: stepastrunkov/serializer
     networks:
       - net
     command:
       uvicorn main:app --host "xml" --port 8090
   avro:
-    build:
-      dockerfile: Dockerfile.common
+    image: stepastrunkov/serializer
     networks:
       - net
     command:
       uvicorn main:app --host "avro" --port 8091
   proto:
-    build:
-      dockerfile: Dockerfile.common
+    image: stepastrunkov/serializer
     networks:
       - net
     command:
       uvicorn main:app --host "proto" --port 8092
   native:
-    build:
-      dockerfile: Dockerfile.common
+    image: stepastrunkov/serializer
     networks:
       - net
     command:
@@ -59,8 +52,7 @@ services:
 
 
   proxy:
-    build:
-      dockerfile: Dockerfile.common
+    image: stepastrunkov/serializer
     networks:
       - net
     ports:
@@ -79,8 +71,7 @@ services:
       - msgpack
 
   client:
-    build:
-      dockerfile: Dockerfile.common
+    image: stepastrunkov/serializer
     networks:
       - net
     ports:
