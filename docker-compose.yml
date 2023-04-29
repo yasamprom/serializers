@@ -1,53 +1,52 @@
 version: '3'
 
+networks:
+  net:
+    driver: bridge
+
+
 services:
   json:
     build:
       dockerfile: Dockerfile.common
-    expose:
-      - 8080
-    ports:
-      - "0.0.0.0:8080:8080"
+    networks:
+      - net
     command:
-      uvicorn main:app --host 0.0.0.0 --port 8080
+      uvicorn main:app --host "json" --port 8080
   yaml:
     build:
       dockerfile: Dockerfile.common
-    expose:
-      - 8088
-    ports:
-      - "0.0.0.0:8088:8088"
+    networks:
+      - net
     command:
-      uvicorn main:app --host 0.0.0.0 --port 8088
+      uvicorn main:app --host "yaml" --port 8088
   msgpack:
     build:
       dockerfile: Dockerfile.common
-    expose:
-      - 8089
-    ports:
-      - "0.0.0.0:8089:8089"
+    networks:
+      - net
     command:
-      uvicorn main:app --host 0.0.0.0 --port 8089
+      uvicorn main:app --host "msgpack" --port 8089
   xml:
     build:
       dockerfile: Dockerfile.common
-    expose:
-      - 8090
-    ports:
-      - "0.0.0.0:8090:8090"
+    networks:
+      - net
     command:
-      uvicorn main:app --host 0.0.0.0 --port 8090
+      uvicorn main:app --host "xml" --port 8090
 
   proxy:
     build:
       dockerfile: Dockerfile.common
-    expose:
-      - 2000/udp
+    networks:
+      - net
     ports:
       - 2000:2000/udp
     environment:
-      PROXY_HOST: "127.0.0.1"
+      PROXY_HOST: "proxy"
       PROXY_PORT: "2000"
+      CLIENT_PORT: "2001"
+      CLIENT_HOST: "client"
     command:
       python3 proxy.py
     depends_on:
@@ -59,14 +58,15 @@ services:
   client:
     build:
       dockerfile: Dockerfile.common
-    expose:
-      - 2001/udp
+    networks:
+      - net
     ports:
       - 2001:2001/udp
     environment:
+      CLIENT_HOST: "client"
       PROXY_PORT: "2000"
-      CLIENT_HOST: "127.0.0.1"
       CLIENT_PORT: "2001"
+      PROXY_HOST: "proxy"
     depends_on:
       - proxy
     command:

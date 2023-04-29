@@ -5,7 +5,7 @@ import requests
 import logging
 logging.basicConfig(level=logging.INFO)
 
-
+MAIN_HOST = "0.0.0.0"
 HOST = os.getenv("PROXY_HOST")
 PORT = os.getenv("PROXY_PORT")
 FORWARD = {
@@ -28,7 +28,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         logging.info("proxy <- client: %s", query)
         if query["type"] == "get_result":
             body = {"addr": query["addr"]}
-            link = "http://" + HOST + ":" + str(FORWARD[query["format"]]) + "/test/" + query["format"]
+            link = "http://" + query["format"] + ":" + str(FORWARD[query["format"]]) + "/test/" + query["format"]
 
             logging.info("proxy -> main: %s", link)
             resp = requests.get(link, params=body)
