@@ -34,6 +34,13 @@ services:
       - net
     command:
       uvicorn main:app --host "xml" --port 8090
+  avro:
+    build:
+      dockerfile: Dockerfile.common
+    networks:
+      - net
+    command:
+      uvicorn main:app --host "avro" --port 8091
 
   proxy:
     build:

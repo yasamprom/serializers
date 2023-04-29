@@ -12,7 +12,8 @@ FORWARD = {
     "json": 8080,
     "yaml": 8088,
     "msgpack": 8089,
-    "xml": 8090
+    "xml": 8090,
+    "avro": 8091
 }
 BUFF_SIZE = 1024
 

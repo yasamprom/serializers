@@ -3,8 +3,10 @@ import jsonpickle
 import yaml
 import msgpack
 from fastapi import FastAPI, HTTPException
+import fastavro
 import time
 import sys
+from pympler import asizeof
 import logging
 
 
@@ -17,6 +19,14 @@ class Data:
         self.myset = {123, 123123, 123123123}
         self.dct = {"123": 123, "123123": [123] * 50}
         self.tup = (123, 123, 123)
+data_dict =  {
+        "float": 123.001,
+        "integer": 123,
+        "string":"123" * 100,
+        "lst": [123] * 100,
+        "myset": {123, 123123, 123123123},
+        "dct": {"123": "123"}
+}
 
 def to_json(cls):
     return jsonpickle.encode(cls)
@@ -47,6 +57,29 @@ def to_msg(cls):
 def from_msg(msg_str):
     return msgpack.unpackb(msg_str, strict_map_key=False)
 
+def to_avro(cls):
+    data_schema = {
+        "type": "record",
+        "name": "dict",
+        "fields": [
+            {"name": "float", "type": "float"},
+            {"name": "integer", "type": "int"},
+            {"name": "string", "type": "string"},
+            {"name": "lst", "type": {"type": "array", "items": "int"}},
+            {"name": "dct", "type": {"type": "map", "values": "string"}},
+        ]
+    }
+    with open("data.avro", "wb") as avro_file:
+        fastavro.schemaless_writer(avro_file, data_schema, data_dict)
+    return None
+
+def from_avro(msg):
+    return
+    with open('data.avro', 'rb') as fo:
+        avro_reader = fastavro.reader(fo)
+        for _ in avro_reader:
+            pass
+
 
 dt = Data()
 
@@ -57,18 +90,21 @@ async def test(type: str):
     logging.info("main server got query: %s", type)
     cycles = 100
     ser_func, deser_func = None, None
-    if type == "json":  # json
+    if type == "json":
         ser_func = to_json
         deser_func = from_json
-    if type == "xml":  # xml
+    if type == "xml":
         ser_func = to_xml
         deser_func = from_xml
-    if type == "yaml":  # yaml
+    if type == "yaml":
         ser_func = to_yaml
         deser_func = from_yaml
-    if type == "msgpack":  # msgpack
+    if type == "msgpack":
         ser_func = to_msg
         deser_func = from_msg
+    if type == "avro":
+        ser_func = to_avro
+        deser_func = from_avro
 
     if ser_func is None or deser_func is None:
         return {"error": "no such type of serialization"}
@@ -87,5 +123,5 @@ async def test(type: str):
     return {
         "serialization": "%.6f" % ser_time,
         "deserialization": "%.6f" % deser_time,
-        "size": sys.getsizeof(dt)
+        "size": asizeof.asizeof(dt)
     }
