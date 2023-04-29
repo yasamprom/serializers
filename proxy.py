@@ -13,7 +13,8 @@ FORWARD = {
     "msgpack": 8089,
     "xml": 8090,
     "avro": 8091,
-    "proto": 8092
+    "proto": 8092,
+    "native": 8093
 }
 BUFF_SIZE = 1024
 

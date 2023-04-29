@@ -48,6 +48,15 @@ services:
       - net
     command:
       uvicorn main:app --host "proto" --port 8092
+  native:
+    build:
+      dockerfile: Dockerfile.common
+    networks:
+      - net
+    command:
+      uvicorn main:app --host "native" --port 8093
+
+
 
   proxy:
     build:

@@ -7,6 +7,7 @@ import msgpack
 from fastapi import FastAPI, HTTPException
 import fastavro
 import time
+import pickle
 import sys
 import data_pb2
 from pympler import asizeof
@@ -21,6 +22,7 @@ class Data:
         self.string = "123" * 100
         self.lst = [123] * 100
         self.dct = {"123": 123}
+
 data_dict =  {
         "float": 123.001,
         "bool": True,
@@ -29,6 +31,12 @@ data_dict =  {
         "lst": [123] * 100,
         "dct": {"123": "123"}
 }
+
+def to_native(cls):
+    return pickle.dumps(cls)
+
+def from_native(msg):
+    return pickle.loads(msg)
 
 def to_json(cls):
     return jsonpickle.encode(cls)
@@ -88,6 +96,7 @@ data_schema = {
             {"name": "dct", "type": {"type": "map", "values": "string"}},
         ]
     }
+
 def to_avro(cls):
     bytes_writer = BytesIO()
     fastavro.schemaless_writer(bytes_writer, data_schema, data_dict)
@@ -128,6 +137,9 @@ async def test(type: str):
     if type == "proto":
         ser_func = to_proto
         deser_func = from_proto
+    if type == "native":
+        ser_func = to_native
+        deser_func = from_native
 
     if ser_func is None or deser_func is None:
         return {"error": "no such type of serialization"}

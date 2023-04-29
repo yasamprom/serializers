@@ -16,7 +16,7 @@ for pings in range(SAMPLE_QUERIES):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     client_socket.bind((CLIENT_HOST, int(PORT)))
     client_socket.settimeout(5.0)
-    formats = ["json", "xml", "msgpack", "yaml", "avro", "proto"]
+    formats = ["json", "xml", "msgpack", "yaml", "avro", "proto", "native"]
     chosen_format_index = random.randint(0, len(formats) - 1)
     message = {
         "type": "get_result",
