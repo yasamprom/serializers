@@ -52,7 +52,9 @@ services:
 
 
   proxy:
-    image: stepastrunkov/serializer
+    build:
+      context: .
+      dockerfile: Dockerfile.common
     networks:
       - net
     ports:
@@ -70,18 +72,18 @@ services:
       - xml
       - msgpack
 
-  client:
-    image: stepastrunkov/serializer
-    networks:
-      - net
-    ports:
-      - 2001:2001/udp
-    environment:
-      CLIENT_HOST: "client"
-      PROXY_PORT: "2000"
-      CLIENT_PORT: "2001"
-      PROXY_HOST: "proxy"
-    depends_on:
-      - proxy
-    command:
-      python3 client.py
+#  client:
+#    image: stepastrunkov/serializer
+#    networks:
+#      - net
+#    ports:
+#      - 2001:2001/udp
+#    environment:
+#      CLIENT_HOST: "client"
+#      PROXY_PORT: "2000"
+#      CLIENT_PORT: "2001"
+#      PROXY_HOST: "proxy"
+#    depends_on:
+#      - proxy
+#    command:
+#      python3 client.py

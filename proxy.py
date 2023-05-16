@@ -23,19 +23,21 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.bind((HOST, int(PORT)))
     logging.info("Listen %s:%s", HOST, PORT)
     while True:
-        data = s.recv(BUFF_SIZE)
+        data, addr = s.recvfrom(BUFF_SIZE)
         if not data:
             pass
         query = json.loads(data.decode("utf-8").replace("'", '"'))
         logging.info("proxy <- client: %s", query)
         if query["type"] == "get_result":
-            body = {"addr": query["addr"]}
-            link = "http://" + query["format"] + ":" + str(FORWARD[query["format"]]) + "/test/" + query["format"]
+            if query["format"] not in FORWARD:
+                s.sendto(bytes("Bad data format", encoding="utf-8"), addr)
+            else:
+                link = "http://" + query["format"] + ":" + str(FORWARD[query["format"]]) + "/test/" + query["format"]
 
-            logging.info("proxy -> main: %s", link)
-            resp = requests.get(link, params=body)
+                logging.info("proxy -> main: %s", link)
+                resp = requests.get(link)
 
-            logging.info("proxy got response: %s", resp)
-            logging.info("redirect to client")
+                logging.info("proxy got response: %s", resp)
+                logging.info("redirect to client")
 
-            s.sendto(bytes(resp.text, encoding="utf-8"), (query["addr"], int(query["port"])))
+                s.sendto(bytes(resp.text, encoding="utf-8"), addr)
